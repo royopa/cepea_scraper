@@ -7,13 +7,11 @@ import datetime
 from tqdm import tqdm
 import os
 import pandas as pd
-import xlrd
 import pyexcel_xls
 
 
 def get_ultima_data_disponivel_base(path_file_base):
     # verifica a última data disponível na base
-    ultima_data_base = ''
     with open(path_file_base, 'r') as f:
         for row in reversed(list(csv.reader(f))):
             data = row[0].split(';')[0]
@@ -31,7 +29,7 @@ def download_file(url, file_name):
     handle.close()
 
 
-if __name__ == '__main__':
+def main():
     # verifica a última data disponível na base 
     name_file_base = 'preco_algodao_8_dias_base.csv'
     path_file_base = os.path.join('bases', name_file_base)
@@ -86,3 +84,7 @@ if __name__ == '__main__':
         print(df.tail(5))
 
     print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)
+
+
+if __name__ == '__main__':
+    main()

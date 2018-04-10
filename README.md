@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/royopa/cepea-scraper.svg?branch=master)](https://travis-ci.org/royopa/cepea-scraper)
+
 CEPEA scraper
 -------------
 
@@ -27,5 +29,5 @@ ou caso vocë utilize o pipenv, utilize o comando abaixo e ative o virtualenv:
 Para fazer o download dos preços e atualizar a [base de dados de preços](https://github.com/royopa/cepea-scraper/blob/master/bases/) basta executar o programa [download_precos.py](https://github.com/royopa/cepea-scraper/blob/master/download_precos.py) com o comando abaixo:
 
 ```sh
-> python download_precos.py
+> python main.py
 ```
