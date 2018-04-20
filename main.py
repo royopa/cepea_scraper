@@ -31,7 +31,7 @@ def download_file(url, file_name):
 
 def main():
     # verifica a última data disponível na base 
-    name_file_base = 'preco_algodao_8_dias_base.csv'
+    name_file_base = 'precos_cepea_base.csv'
     path_file_base = os.path.join('bases', name_file_base)
     # ultima data base dispon[ivel
     ultima_data_base = get_ultima_data_disponivel_base(path_file_base)
@@ -53,7 +53,7 @@ def main():
         {'base_name': 'etanol_hidratado', 'url': base_url + 'etanol.aspx?id=103'},
         {'base_name': 'etanol_anidro', 'url': base_url + 'etanol.aspx?id=104'},
         {'base_name': 'frango_congelado', 'url': base_url + 'frango.aspx?id=181'},
-        {'base_name': 'franco_resfriado', 'url': base_url + 'frango.aspx?id=130'},
+        {'base_name': 'frango_resfriado', 'url': base_url + 'frango.aspx?id=130'},
         {'base_name': 'leite_liquido', 'url': base_url + 'leite.aspx?id=leitel'},
         {'base_name': 'leite_bruto', 'url': base_url + 'leite.aspx?id=leite'},
         {'base_name': 'raiz_mandioca', 'url': base_url + 'mandioca.aspx?id=72'},
@@ -80,8 +80,20 @@ def main():
         data = pyexcel_xls.get_data(path_file)
         pyexcel_xls.save_data(path_file, data)
         
-        df = pd.read_excel(path_file, sheet_name="Plan 1", skiprows=4)
-        print(df.tail(5))
+        df = pd.read_excel(path_file, sheet_name="Plan 1", skiprows=3)
+        df['no_produto'] = dado['base_name']
+
+        new_columns = {
+            'À vista R$': 'vr_real',
+            'À vista US$': 'vr_dolar',
+            'Data': 'dt_referencia'
+        }
+    
+        df = df.rename(columns=new_columns)
+        
+        #df['dt_referencia'] = pd.to_datetime(df['dt_referencia'], format='%d/%m/%Y', errors='ignore')
+        
+        print(df.info())
 
     print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)
 
