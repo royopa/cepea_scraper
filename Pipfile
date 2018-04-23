@@ -18,6 +18,7 @@ requests = "*"
 xlrd = "*"
 pyexcel = "*"
 pyexcel-xls = "*"
+xlsxwriter = "*"
 
 
 [requires]

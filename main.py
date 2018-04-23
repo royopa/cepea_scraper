@@ -67,6 +67,8 @@ def main():
         {'base_name': 'trigo_parana', 'url': base_url + 'trigo.aspx?id=178'}
     ]
 
+    df_saida = pd.DataFrame(columns=['dt_referencia', 'vr_real', 'vr_dolar'])
+
     # faz o download do excel no site do CEPEA
     for dado in dados:
         name_file = dado['base_name'] + '_' + time.strftime("%d.%m.%Y") + '.xls'
@@ -80,6 +82,9 @@ def main():
         data = pyexcel_xls.get_data(path_file)
         pyexcel_xls.save_data(path_file, data)
         
+        if dado['base_name'] in ['suino_vivo', 'leite_liquido', 'leite_bruto']:
+            continue
+        
         df = pd.read_excel(path_file, sheet_name="Plan 1", skiprows=3)
         df['no_produto'] = dado['base_name']
 
@@ -90,12 +95,20 @@ def main():
         }
     
         df = df.rename(columns=new_columns)
-        
-        #df['dt_referencia'] = pd.to_datetime(df['dt_referencia'], format='%d/%m/%Y', errors='ignore')
-        
+        df['dt_referencia'] = pd.to_datetime(df['dt_referencia'], format='%d/%m/%Y', errors='ignore')
         print(df.info())
 
+    df_saida = pd.concat(list_df)
     print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)
+
+    print(df_saida.info())
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    path_saida = os.path.join('bases', 'precos_cepea_base.xlsx')
+    writer = pd.ExcelWriter(path_saida, engine='xlsxwriter')
+    # Convert the dataframe to an XlsxWriter Excel object.
+    df.to_excel(writer, sheet_name='Sheet1')
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.save()
 
 
 if __name__ == '__main__':
