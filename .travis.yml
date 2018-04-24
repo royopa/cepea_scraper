@@ -8,7 +8,7 @@ install:
   - 'pipenv install --deploy --system --dev'
 
 script:
-  - "pipenv shell && python ./main.py"
+  - "python ./main.py"
 
 notifications:
   email:
