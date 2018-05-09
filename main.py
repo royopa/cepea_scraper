@@ -7,6 +7,7 @@ import datetime
 import os
 import pandas as pd
 import pyexcel_xls
+from tqdm import tqdm
 
 
 def get_ultima_data_disponivel_base(path_file_base):
@@ -14,10 +15,10 @@ def get_ultima_data_disponivel_base(path_file_base):
     with open(path_file_base, 'r') as f:
         for row in reversed(list(csv.reader(f))):
             data = row[0].split(';')[0]
-            if data == 'Data':
+            if data == 'dt_referencia':
                 return None
             data = row[0].split(';')[0]
-            return datetime.datetime.strptime(data, '%d/%m/%Y').date()
+            return datetime.datetime.strptime(data, '%Y-%m-%d').date()
 
 
 def download_file(url, file_name):
@@ -80,8 +81,16 @@ def main():
         # corrige o problema de leitura do pandas para "corrupted data"
         data = pyexcel_xls.get_data(path_file)
         pyexcel_xls.save_data(path_file, data)
-        
-        if dado['base_name'] in ['suino_vivo', 'leite_liquido', 'leite_bruto']:
+
+        ignore_import_list = [
+            'suino_vivo',
+            'leite_liquido',
+            'leite_bruto',
+            'ovos_produto_posto',
+            'ovos_produto_a_retirar'
+        ]
+
+        if dado['base_name'] in ignore_import_list:
             continue
         
         df = pd.read_excel(path_file, sheet_name="Plan 1", skiprows=3)
@@ -95,12 +104,30 @@ def main():
     
         df = df.rename(columns=new_columns)
         df['dt_referencia'] = pd.to_datetime(df['dt_referencia'], format='%d/%m/%Y', errors='ignore')
-        
 
-    df_saida = pd.concat(list_df)
+        # seleciona apenas os registros com data de referencia maior que a data base
+        df = df[(df['dt_referencia'] > ultima_data_base)]
+
+        # importa para o csv base
+        '''
+        for index, row in df.iterrows():
+            print(row['dt_referencia'], row['no_produto'])
+
+        with open(path_file_base, 'a', newline='') as baseFile:
+            fieldnames = ['dt_referencia', 'no_produto', 'no_tipo', 'vr_real', 'vr_dolar']
+            writer = csv.DictWriter(baseFile, fieldnames=fieldnames, delimiter=';', quoting=csv.QUOTE_NONNUMERIC)
+            row_inserted = {
+                'dt_referencia': '',
+                'no_produto': '',
+                'no_tipo': '',
+                'vr_real': '',
+                'vr_dolar': ''
+            }
+            writer.writerow(row_inserted)
+        '''
+
     print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)
 
-    print(df_saida.info())
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     path_saida = os.path.join('bases', 'precos_cepea_base.xlsx')
     writer = pd.ExcelWriter(path_saida, engine='xlsxwriter')
