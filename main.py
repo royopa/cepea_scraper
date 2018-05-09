@@ -21,6 +21,17 @@ def get_ultima_data_disponivel_base(path_file_base):
             return datetime.datetime.strptime(data, '%Y-%m-%d').date()
 
 
+def remove_old_files():
+    file_list = os.listdir(r"downloads")
+    for file_name in file_list:
+        if not file_name.endswith('.xls'):
+            continue
+        today = datetime.datetime.now().strftime('%d.%m.%Y')
+        data_arquivo = file_name.split('.xls')[-2][-10:]
+        if today != data_arquivo:
+            os.remove(os.path.join('downloads', file_name))
+
+
 def download_file(url, file_name):
     response = requests.get(url, stream=True)
     with open(file_name, "wb") as handle:
@@ -29,18 +40,25 @@ def download_file(url, file_name):
     handle.close()
 
 
-def main():
-    # verifica a última data disponível na base 
-    name_file_base = 'precos_cepea_base.csv'
-    path_file_base = os.path.join('bases', name_file_base)
-    # ultima data base dispon[ivel
-    ultima_data_base = get_ultima_data_disponivel_base(path_file_base)
-    print('Última data base disponível:', ultima_data_base)
-    if (ultima_data_base is None):
-        ultima_data_base = datetime.date(1900, 1, 1)
+def generate_csv_base(df, path_file_base):
+    # organizar o arquivo base por dt_referencia
+    df = pd.read_csv(path_file_base, sep=';')
+    df = df.sort_values('dt_referencia')
+    # set the index
+    df.set_index('dt_referencia', inplace=True)
+    df.to_csv(path_file_base, sep=';')
 
-    base_url = 'https://www.cepea.esalq.usp.br/br/indicador/series/'
 
+def generate_xlsx_base(df, path_saida):
+    # Create a Pandas Excel writer using XlsxWriter as the engine.
+    writer = pd.ExcelWriter(path_saida, engine='xlsxwriter')
+    # Convert the dataframe to an XlsxWriter Excel object.
+    df.to_excel(writer, sheet_name='Sheet1')
+    # Close the Pandas Excel writer and output the Excel file.
+    writer.save()
+
+
+def get_dados(base_url):
     dados = [
         {'base_name': 'acucar_cristal_sao_paulo', 'url': base_url + 'acucar.aspx?id=53'},
         {'base_name': 'algodao_8_dias', 'url': base_url + 'algodao.aspx?id=54'},
@@ -66,8 +84,23 @@ def main():
         {'base_name': 'suino_vivo', 'url': base_url + 'suino.aspx?id=129'},
         {'base_name': 'trigo_parana', 'url': base_url + 'trigo.aspx?id=178'}
     ]
+    return dados
 
-    df_saida = pd.DataFrame(columns=['dt_referencia', 'vr_real', 'vr_dolar'])
+
+def main():
+    # apaga arquivos antigos
+    remove_old_files()
+    # verifica a última data disponível na base 
+    name_file_base = 'precos_cepea_base.csv'
+    path_file_base = os.path.join('bases', name_file_base)
+    # ultima data base dispon[ivel
+    ultima_data_base = get_ultima_data_disponivel_base(path_file_base)
+    print('Última data base disponível:', ultima_data_base)
+    if (ultima_data_base is None):
+        ultima_data_base = datetime.date(1900, 1, 1)
+
+    base_url = 'https://www.cepea.esalq.usp.br/br/indicador/series/'
+    dados = get_dados(base_url)
 
     # faz o download do excel no site do CEPEA
     for dado in dados:
@@ -75,6 +108,7 @@ def main():
         path_file = os.path.join('downloads', name_file)
         print(path_file)
 
+        # faz o download do arquivo caso ele ainda não tiver sido baixado
         if not os.path.exists(path_file):
             download_file(dado['url'], path_file)
 
@@ -87,7 +121,9 @@ def main():
             'leite_liquido',
             'leite_bruto',
             'ovos_produto_posto',
-            'ovos_produto_a_retirar'
+            'ovos_produto_a_retirar',
+            'raiz_mandioca',
+            'fecula_mandioca'
         ]
 
         if dado['base_name'] in ignore_import_list:
@@ -108,33 +144,31 @@ def main():
         # seleciona apenas os registros com data de referencia maior que a data base
         df = df[(df['dt_referencia'] > ultima_data_base)]
 
-        # importa para o csv base
-        '''
-        for index, row in df.iterrows():
-            print(row['dt_referencia'], row['no_produto'])
+        if len(df) == 0:
+            print('Nenhum registro a ser importado', path_file)
+            continue
 
+        # importa para o csv base
         with open(path_file_base, 'a', newline='') as baseFile:
             fieldnames = ['dt_referencia', 'no_produto', 'no_tipo', 'vr_real', 'vr_dolar']
             writer = csv.DictWriter(baseFile, fieldnames=fieldnames, delimiter=';', quoting=csv.QUOTE_NONNUMERIC)
-            row_inserted = {
-                'dt_referencia': '',
-                'no_produto': '',
-                'no_tipo': '',
-                'vr_real': '',
-                'vr_dolar': ''
-            }
-            writer.writerow(row_inserted)
-        '''
+            # insere cada registro na database
+            for row in df.iterrows():            
+                row_inserted = {
+                    'dt_referencia': row['dt_referencia'].date(),
+                    'no_produto': row['no_produto'],
+                    'no_tipo': row['no_produto'].split('_')[0],
+                    'vr_real': row['vr_real'],
+                    'vr_dolar': row['vr_dolar']
+                }
+                writer.writerow(row_inserted)
 
-    print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)
-
+    # organizar o arquivo base por dt_referencia
+    generate_csv_base(df, path_file_base)
     # Create a Pandas Excel writer using XlsxWriter as the engine.
     path_saida = os.path.join('bases', 'precos_cepea_base.xlsx')
-    writer = pd.ExcelWriter(path_saida, engine='xlsxwriter')
-    # Convert the dataframe to an XlsxWriter Excel object.
-    df.to_excel(writer, sheet_name='Sheet1')
-    # Close the Pandas Excel writer and output the Excel file.
-    writer.save()
+    generate_xlsx_base(df, path_saida)
+    print("Arquivos baixados com sucesso e importados para a base de dados")
 
 
 if __name__ == '__main__':
