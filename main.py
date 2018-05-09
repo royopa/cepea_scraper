@@ -4,7 +4,6 @@ import requests
 import time
 import csv
 import datetime
-from tqdm import tqdm
 import os
 import pandas as pd
 import pyexcel_xls
@@ -96,7 +95,7 @@ def main():
     
         df = df.rename(columns=new_columns)
         df['dt_referencia'] = pd.to_datetime(df['dt_referencia'], format='%d/%m/%Y', errors='ignore')
-        print(df.info())
+        
 
     df_saida = pd.concat(list_df)
     print("Arquivos baixados com sucesso e estão disponíveis na pasta downloads:", name_file)

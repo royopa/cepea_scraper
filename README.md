@@ -26,7 +26,7 @@ ou caso vocë utilize o pipenv, utilize o comando abaixo e ative o virtualenv:
 
 #### 1º passo - Fazer o download e atualizar a base de dados de preços
 
-Para fazer o download dos preços e atualizar a [base de dados de preços](https://github.com/royopa/cepea-scraper/blob/master/bases/) basta executar o programa [download_precos.py](https://github.com/royopa/cepea-scraper/blob/master/download_precos.py) com o comando abaixo:
+Para fazer o download dos preços e atualizar a [base de dados de preços](https://github.com/royopa/cepea-scraper/blob/master/bases/) basta executar o programa [main.py](https://github.com/royopa/cepea-scraper/blob/master/main.py) com o comando abaixo:
 
 ```sh
 > python main.py
