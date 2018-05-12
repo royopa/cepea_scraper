@@ -1,5 +1,4 @@
 pipenv
-request
 pandas
 tqdm
 requests
