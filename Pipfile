@@ -14,7 +14,6 @@ url = "https://pypi.python.org/simple"
 requests = "*"
 pandas = "*"
 tqdm = "*"
-requests = "*"
 xlrd = "*"
 pyexcel = "*"
 pyexcel-xls = "*"
@@ -23,4 +22,4 @@ xlsxwriter = "*"
 
 [requires]
 
-python_version = "3.5"
+python_version = "3"
