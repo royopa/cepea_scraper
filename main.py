@@ -7,6 +7,8 @@ import datetime
 import os
 import pandas as pd
 import pyexcel_xls
+from openpyxl import Workbook
+from openpyxl import load_workbook
 from tqdm import tqdm
 
 
@@ -116,6 +118,7 @@ def main():
         data = pyexcel_xls.get_data(path_file)
         pyexcel_xls.save_data(path_file, data)
 
+
         ignore_import_list = [
             'suino_vivo',
             'leite_liquido',
@@ -130,6 +133,7 @@ def main():
             continue
         
         df = pd.read_excel(path_file, sheet_name="Plan 1", skiprows=3)
+
         df['no_produto'] = dado['base_name']
 
         new_columns = {
@@ -153,7 +157,7 @@ def main():
             fieldnames = ['dt_referencia', 'no_produto', 'no_tipo', 'vr_real', 'vr_dolar']
             writer = csv.DictWriter(baseFile, fieldnames=fieldnames, delimiter=';', quoting=csv.QUOTE_NONNUMERIC)
             # insere cada registro na database
-            for row in df.iterrows():            
+            for row in df.iterrows():
                 row_inserted = {
                     'dt_referencia': row['dt_referencia'].date(),
                     'no_produto': row['no_produto'],

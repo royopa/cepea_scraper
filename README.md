@@ -10,14 +10,14 @@ O CEPEA scraper é um projeto para captura de dados do site CEPEA com preços de
 Para instalar as dependências do projeto utilize o comando abaixo:
 
 ```sh
-> cd petrobras-scraper
+> cd cepea-scraper
 > pip install -r requirements.txt
 ```
 
 ou caso vocë utilize o pipenv, utilize o comando abaixo e ative o virtualenv:
 
 ```sh
-> cd petrobras-scraper
+> cd cepea-scraper
 > pipenv install
 > pipenv shell
 ```

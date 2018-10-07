@@ -11,3 +11,4 @@ xlsxwriter
 requests_html
 wget
 tqdm
+openpyxl
