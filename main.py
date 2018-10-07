@@ -157,7 +157,7 @@ def main():
             fieldnames = ['dt_referencia', 'no_produto', 'no_tipo', 'vr_real', 'vr_dolar']
             writer = csv.DictWriter(baseFile, fieldnames=fieldnames, delimiter=';', quoting=csv.QUOTE_NONNUMERIC)
             # insere cada registro na database
-            for row in df.iterrows():
+            for index, row in df.iterrows():
                 row_inserted = {
                     'dt_referencia': row['dt_referencia'].date(),
                     'no_produto': row['no_produto'],
