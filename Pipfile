@@ -11,10 +11,10 @@ url = "https://pypi.python.org/simple"
 
 [packages]
 
-requests = "*"
+requests = ">=2.20.0"
 pandas = "*"
 tqdm = "*"
-xlrd = "*"
+xlrd = ">=1.1.0"
 pyexcel = "*"
 pyexcel-xls = "*"
 xlsxwriter = "*"
